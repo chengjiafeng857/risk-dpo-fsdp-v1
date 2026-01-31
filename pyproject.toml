@@ -15,5 +15,7 @@ dependencies = [
   "scipy",
   "wandb",
   "numpy",
+  "vllm",
+  "openai",
 ]
 

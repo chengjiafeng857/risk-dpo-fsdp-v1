@@ -44,7 +44,8 @@ def build_vllm_model(model_path, use_bf16, tensor_parallel_size):
         model=model_path,
         tensor_parallel_size=tensor_parallel_size,
         dtype=dtype,
-        trust_remote_code=True
+        trust_remote_code=True,
+        disable_log_stats=True,
     )
     return llm
 
@@ -111,44 +112,7 @@ def main():
     prompts = [ex["prompt"] for ex in hh]
     chosens = [ex["chosen"] for ex in hh]
 
-    # policy model generation
-    policy_records = []
-    policy_model_path = config["dpo_training"]["save_dir"]
-    policy_llm = build_vllm_model(policy_model_path, use_bf16, tensor_parallel_size)
-
     total_chunks = (len(prompts) + chunk_size - 1) // chunk_size
-
-    for start_idx, prompt_chunk in tqdm(
-        chunked(prompts, chunk_size=chunk_size),
-        desc="vLLM generating",
-        total=total_chunks
-    ):
-        policy_outs = policy_llm.generate(prompt_chunk, sampling_params)
-
-        for i, out in enumerate(policy_outs):
-            global_i = start_idx + i
-            text = out.outputs[0].text.lstrip()
-
-            policy_records.append({
-                "idx": global_i,
-                "prompt": prompts[global_i],
-                "response": text,
-                "HH_response": chosens[global_i],
-                "model_id": "policy_model",
-                "dataset": "Anthropic/hh-rlhf",
-                "split": "test",
-                "max_prompt_length": max_prompt_length,
-                "max_new_tokens": max_new_tokens,
-                "do_sample": bool(do_sample),
-                "temperature": float(temperature) if do_sample else 0.0,
-                "top_p": float(top_p) if do_sample else 1.0,
-        })
-
-    policy_out_dir = test_cfg["HH_test_policy_out"]
-    build_write_jsonl(policy_out_dir, policy_records)
-
-    # base model generation
-    del policy_llm
 
     base_records = []  
     base_llm = build_vllm_model(base_model_name, use_bf16=use_bf16, tensor_parallel_size=tensor_parallel_size)

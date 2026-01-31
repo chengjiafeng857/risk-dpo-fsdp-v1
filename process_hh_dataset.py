@@ -163,7 +163,11 @@ def build_train_val_dist(config, tokenizer, rank, world_size):
     max_len = int(ds_cfg['max_len'])
     batch_size = int(config['dpo_training']['batch_size'])
 
-    ds = load_dataset(raw_dataset, split=split)
+    ds = load_dataset(
+        raw_dataset, 
+        data_dir="harmless-base",
+        split=split
+        )
     ds_triple = build_HH_dataset(ds)
 
     split_ds = ds_triple.train_test_split(test_size=val_ratio, seed=seed)
