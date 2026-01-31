@@ -37,11 +37,12 @@ def get_vllm_sampling_params(do_sample, temperature, top_p, max_prompt_length, m
     return sampling_params
 
 # build vllm model
-def build_vllm_model(model_path, use_bf16, tensor_parallel_size):
+def build_vllm_model(model_path, tokenizer_name, use_bf16, tensor_parallel_size):
     dtype = "bfloat16" if use_bf16 else "float16"
 
     llm = LLM(
         model=model_path,
+        tokenizer=tokenizer_name,
         tensor_parallel_size=tensor_parallel_size,
         dtype=dtype,
         trust_remote_code=True,
@@ -77,7 +78,7 @@ def main():
 
     # load tokenizer
     base_model_name = config['ref_model']
-    # tokenizer_name = config['policy_model']
+    tokenizer_name = config['policy_model']
     # tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, use_fast=True)
     # if tokenizer.pad_token_id is None:
     #     tokenizer.pad_token = tokenizer.eos_token
@@ -116,7 +117,8 @@ def main():
     total_chunks = (len(prompts) + chunk_size - 1) // chunk_size
 
     base_records = []  
-    base_llm = build_vllm_model(base_model_name, use_bf16=use_bf16, tensor_parallel_size=tensor_parallel_size)
+    base_records = []  
+    base_llm = build_vllm_model(base_model_name, tokenizer_name=tokenizer_name, use_bf16=use_bf16, tensor_parallel_size=tensor_parallel_size)
 
     for start_idx, prompt_chunk in tqdm(
         chunked(prompts, chunk_size=chunk_size),
