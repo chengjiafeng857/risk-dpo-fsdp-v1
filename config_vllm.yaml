@@ -1,5 +1,5 @@
 policy_model: meta-llama/Llama-3.1-8B-Instruct
-ref_model: meta-llama/Llama-3.1-8B-Instruct
+ref_model: Phainon/dpo_llama3_8b
 precision: bf16
 
 dataset:

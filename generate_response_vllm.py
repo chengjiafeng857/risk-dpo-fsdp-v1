@@ -77,9 +77,10 @@ def main():
 
     # load tokenizer
     base_model_name = config['ref_model']
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name, use_fast=True)
-    if tokenizer.pad_token_id is None:
-        tokenizer.pad_token = tokenizer.eos_token
+    # tokenizer_name = config['policy_model']
+    # tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, use_fast=True)
+    # if tokenizer.pad_token_id is None:
+    #     tokenizer.pad_token = tokenizer.eos_token
     
     # test config
     test_cfg = config['HH_test']
