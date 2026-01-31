@@ -1,13 +1,13 @@
 from huggingface_hub import HfApi
 
-repo_id = "Phainon/dpo_llama3_8b"
+repo_id = "jackf857/llama32-8b-dpo-hh-beta0.5"
 local_dir = "dpo_model"
 
 api = HfApi()
 
 api.create_repo(
     repo_id=repo_id,
-    private=True,
+    private=False,
     exist_ok=True,
 )
 
