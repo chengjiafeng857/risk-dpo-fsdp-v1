@@ -170,9 +170,9 @@ def judge_one(
     b: str,
     max_retries: int,
     rate_sleep: float,
-) -> Tuple[str, str, str]:
+) -> Tuple[str, str, str, str]:
     """
-    Returns (winner_ab, explanation, raw_text)
+    Returns (winner_ab, explanation, raw_text, user_msg_sent)
     """
     user_msg = USER_TMPL.format(prompt=prompt, a=a, b=b)
 
@@ -195,7 +195,7 @@ def judge_one(
             if winner not in ("a", "b", "tie"):
                 raise ValueError(f"Invalid winner='{winner}' raw={raw_text[:200]}")
 
-            return winner, explanation, raw_text
+            return winner, explanation, raw_text, user_msg
 
         except Exception as e:
             last_err = e
@@ -203,7 +203,7 @@ def judge_one(
             time.sleep(rate_sleep * (2 ** (attempt - 1)))
 
     # failed
-    return "tie", f"judge_error: {last_err}", ""
+    return "tie", f"judge_error: {last_err}", "", user_msg
 
 
 def main():
@@ -248,7 +248,7 @@ def main():
             b_id = ex.get("b_id", "b")
             is_swapped = bool(ex.get("is_swapped", False))
 
-            winner_ab, explanation, raw_text = judge_one(
+            winner_ab, explanation, raw_text, prompt_sent = judge_one(
                 client=client,
                 judge_model=args.model,
                 prompt=prompt,
@@ -276,6 +276,7 @@ def main():
             if not args.no_explain:
                 rec["explanation"] = explanation
             if args.keep_raw:
+                rec["judge_prompt_sent"] = prompt_sent
                 rec["judge_raw"] = raw_text
 
             # Count success/fail
